@@ -1,0 +1,7 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: sans-serif; background: #0a0a0f; color: #eeeef5; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fadeUp { animation: fadeUp 0.5s ease forwards; }
+.animate-fadeUp-delay-1 { animation-delay: 0.1s; opacity: 0; }
+.animate-fadeUp-delay-2 { animation-delay: 0.2s; opacity: 0; }
