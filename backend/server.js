@@ -51,9 +51,10 @@ const app = express();
 // Without this, your frontend would get a CORS error even
 // though the server is perfectly functional.
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.ALLOWED_ORIGIN   // restrict in prod
-    : 'http://localhost:3000',     // allow CRA dev server
+  origin: [
+    'http://localhost:3000',
+    'https://resume-analyzer-one-alpha.vercel.app'
+  ],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
