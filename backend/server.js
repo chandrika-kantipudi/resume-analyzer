@@ -27,6 +27,7 @@ const cors = require('cors');
 
 // Import our route handler (see routes/analyze.js)
 const analyzeRoutes = require('./routes/analyze');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 
@@ -81,6 +82,7 @@ app.use(express.json({ limit: '10kb' })); // limit prevents large payload attack
 //    find the analysis endpoint
 // ============================================================
 app.use('/api', analyzeRoutes);
+app.use('/api', uploadRoutes);
 
 // Health check — useful for deployment platforms (Render, Railway)
 // to verify the server is alive
