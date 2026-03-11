@@ -21,6 +21,23 @@ const upload = multer({
   }
 });
 
+async function extractPdfText(buffer) {
+  const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = false;
+  
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+  const pdf = await loadingTask.promise;
+  
+  let fullText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items.map(item => item.str).join(' ');
+    fullText += pageText + '\n';
+  }
+  return fullText;
+}
+
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -31,10 +48,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const { mimetype, buffer } = req.file;
 
     if (mimetype === 'application/pdf') {
-      // Use dynamic import to avoid startup crash
-      const pdfParse = require('pdf-parse/lib/pdf-parse.js');
-      const pdfData = await pdfParse(buffer);
-      extractedText = pdfData.text;
+      extractedText = await extractPdfText(buffer);
     } else if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       const result = await mammoth.extractRawText({ buffer });
       extractedText = result.value;
@@ -43,14 +57,18 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     }
 
     if (!extractedText || extractedText.trim().length < 10) {
-      return res.status(400).json({ error: 'Could not extract text from file. Try copy-pasting instead.' });
+      return res.status(400).json({ 
+        error: 'Could not extract text from file. Try copy-pasting instead.' 
+      });
     }
 
     res.json({ success: true, text: extractedText.trim() });
 
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: 'Failed to parse file. Try copy-pasting instead.' });
+    console.error('Upload error:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to parse file. Try copy-pasting instead.' 
+    });
   }
 });
 
